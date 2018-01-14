@@ -91,10 +91,10 @@ class BasicTree():
 
 
 class Node():
-    __slots__ = [#"type",
-                 "value", "child_type",
-                 "parent", "big_child", "smal_child",
-                 "range_smal", "range_big"]
+    __slots__ = [
+        "value", "child_type",
+        "parent", "big_child", "small_child",
+        "range_small", "range_big"]
 
     def __init__(self, value, child_type, parent, big_child, small_child):
         #self.type = 'node'
@@ -189,6 +189,9 @@ class Node():
                f'lim:({self.range_small}, {self.range_big})>'
 
 class Leaf(Node):
+    __slots__ = [
+        "value", "child_type",
+        "parent", "leaf_obj"]
 
     def __init__(self, value, child_type=''):
         #self.type = 'leaf'
