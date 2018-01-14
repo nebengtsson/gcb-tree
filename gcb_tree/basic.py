@@ -32,32 +32,29 @@ class BasicTree():
         leaf = self.root.add(value)
         leaf.data = data
 
+    def _get_leaf(self, value):
+        return self.root.get(value)
+
     def get(self, value):
-        leaf = self.root.get(value)
+        leaf = self._get_leaf(value)
         if leaf:
             return leaf.data
         raise LookupError(f'Value not found: {value}.')
 
-    def pop(self, value):
-        pass
-
-
-class EmptyNode():
-    def __init__(self, root):
-        self.root = root
-        pass
-
-    def add(self, value):
-        leaf = Leaf(value)
-        self.root.child = leaf
-        leaf.parent = self.root
-        return leaf
-
-    def get(self, value):
-        return None
+    def _drop_leaf(self, leaf):
+        leaf.drop()
+        del leaf.parent
+        del leaf
 
     def pop(self, value):
-        pass
+        leaf = self._get_leaf(value)
+        if leaf:
+            self._drop_leaf(leaf)
+            return leaf.data
+        raise LookupError(f'Value not found: {value}.')
+
+    def remove(self, value):
+        self.pop(value)
 
 
 class Node():
@@ -123,6 +120,23 @@ class Node():
     def _test_value(self, value):
         return self.range_small <= value and value <= self.range_big
 
+    def drop_small(self):
+        """Drop small child and self."""
+        self.big_child.parent = self.parent
+        if self.child_type == 'small':
+            self.parent.small_child = self.big_child
+            self.big_child.child_type = 'small'
+        else:
+            self.parent.big_child = self.big_child
+
+    def drop_big(self):
+        """Drop big child and self."""
+        self.small_child.parent = self.parent
+        if self.child_type == 'big':
+            self.parent.big_child = self.small_child
+            self.small_child.child_type = 'big'
+        else:
+            self.parent.small_child = self.small_child
 
 class Leaf(Node):
 
@@ -142,6 +156,12 @@ class Leaf(Node):
         if value == self.value:
             return self
         return None
+
+    def drop(self):
+        if self.child_type == 'small':
+            self.parent.drop_small()
+        else:
+            self.parent.drop_big()
 
     def _test_value(self, value):
         return value == self.value
@@ -163,6 +183,16 @@ class Root(Node):
             return self.child.add(value)
         raise ValueError('Value not in Tree-range. ({self.range_small} to {self.range_big})')
 
+    def drop_small(self):
+        self.drop_child()
+
+    def drop_big(self):
+        self.drop_child()
+
+    def drop_child(self):
+        self.child.parent = None
+        self.child = EmptyNode(self)
+
     @property
     def small_child(self):
         return self.child
@@ -181,3 +211,26 @@ class Root(Node):
 
     def set_root(self, node):
         self.root = node
+
+    def __repr__(self):
+        return f'<Root>'
+
+class EmptyNode():
+    """The EmptyNode is used when a Tree is empty to change behavior."""
+
+    def __init__(self, root):
+        self.root = root
+        pass
+
+    def add(self, value):
+        """ Create a new leaf, hangs it on root and return."""
+        leaf = Leaf(value)
+        self.root.child = leaf
+        leaf.parent = self.root
+        return leaf
+
+    def get(self, value):
+        return None
+
+    def pop(self, value):
+        return None
