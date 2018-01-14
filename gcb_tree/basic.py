@@ -3,6 +3,10 @@ import numpy as np
 
 arange = np.arange
 
+
+CHARMAP_MAX_SIZE = 16
+
+
 def biggest_bit(a):
     return 1 << a.bit_length()-1
 
@@ -26,7 +30,7 @@ class BasicTree():
         self.root = Root(max_value)
         self.root.child = EmptyNode(self.root)
         self.max_value = max_value
-        self.max_hight = 1 + max_value.bit_length()
+        self.max_hight = max_value.bit_length()
 
     def add(self, value, data):
         leaf = self.root.add(value)
@@ -55,6 +59,35 @@ class BasicTree():
 
     def remove(self, value):
         self.pop(value)
+
+    def _create_charmap(self):
+        """Create a np-array of the tree structure, used for debugging."""
+        if self.max_value > CHARMAP_MAX_SIZE:
+            raise ValueError('Tree to big for charmap, max is {CHARMAP_MAX_SIZE}')
+        charmap = np.zeros([self.max_hight, self.max_value], dtype=int)
+        charmap = self.root.child._create_charmap(charmap, 0)
+        return charmap
+
+    def print_map(self, raw):
+        charmap = self._create_charmap()
+        if raw:
+            print(charmap)
+
+        for row in charmap[:]:
+            s = '"'
+            for r in row:
+                if r == 0:
+                    s += '    '
+                elif r > 0 and r < self.max_value:
+                    s += '(%2d)' % r
+                elif r == 111:
+                    s += '----' % r
+                elif r < 0:
+                    s += '[%2d]' % -r
+            s += '",'
+            print(s)
+        s = ''
+        print(s)
 
 
 class Node():
@@ -138,6 +171,23 @@ class Node():
         else:
             self.parent.small_child = self.small_child
 
+    def _create_charmap(self, charmap, level):
+        charmap = self.small_child._create_charmap(charmap, level + 1)
+        charmap = self.big_child._create_charmap(charmap, level + 1)
+
+        # Add Node range and node value
+        charmap[level, self.small_child.value: self.big_child.value + 1] = 111
+        charmap[level, self.value] = -self.value
+        return charmap
+
+    def print_content(self):
+        return ''
+
+    def __repr__(self):
+        return f'<Node:{self.value}, ' \
+               f'child:({self.small_child.value}, {self.big_child.value}), ' \
+               f'lim:({self.range_small}, {self.range_big})>'
+
 class Leaf(Node):
 
     def __init__(self, value, child_type=''):
@@ -166,6 +216,13 @@ class Leaf(Node):
     def _test_value(self, value):
         return value == self.value
 
+    def _create_charmap(self, charmap, level):
+        charmap[level, self.value] = self.value
+        return charmap
+
+    def __repr__(self):
+        return f'<Leaf:{self.value}>'
+
 class Root(Node):
 
     def __init__(self, max_value):
@@ -174,6 +231,10 @@ class Root(Node):
 
         self.range_small = 0
         self.range_big = max_value
+
+        # For printe_map
+        self.max_value = max_value
+        self.max_hight = 1 + max_value.bit_length()
 
     def get(self, value):
         return self.child.get(value)
