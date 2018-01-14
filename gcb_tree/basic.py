@@ -1,6 +1,5 @@
 import numpy as np
 
-
 arange = np.arange
 
 
@@ -13,11 +12,9 @@ def biggest_bit(a):
 def smallest_bit(a):
     return (1 + (a ^ (a-1))) >> 1
 
-
 def node_range(value):
     sb = smallest_bit(value)
     return (value-sb, value+sb-1)
-
 
 def find_value_node_value(a,b):
     first_diff = 1 << (a^b).bit_length()-1
@@ -25,6 +22,7 @@ def find_value_node_value(a,b):
 
 
 class BasicTree():
+    """Tree class, handle data-structures, algorithem and API."""
 
     def __init__(self, max_value):
         self.root = Root(max_value)
@@ -194,7 +192,6 @@ class Leaf(Node):
         "parent", "leaf_obj"]
 
     def __init__(self, value, child_type=''):
-        #self.type = 'leaf'
         self.parent = None
         self.child_type = child_type
         self.value = value
@@ -227,6 +224,7 @@ class Leaf(Node):
         return f'<Leaf:{self.value}>'
 
 class Root(Node):
+    """Root sits at the tree top."""
 
     def __init__(self, max_value):
         self.child = None
