@@ -189,13 +189,13 @@ class Node():
 class Leaf(Node):
     __slots__ = [
         "value", "child_type",
-        "parent", "leaf_obj"]
+        "parent", "data"]
 
     def __init__(self, value, child_type=''):
         self.parent = None
         self.child_type = child_type
         self.value = value
-        self.leaf_obj = None
+        self.data = None
 
     def add(self, value):
         if self._test_value(value):
