@@ -53,6 +53,7 @@ class BasicTreeTestSuite(unittest.TestCase):
     def test_add(self):
         tree = self.tree
         data = 'Data'
+
         tree.add(5, data)
 
         # Add same twice
@@ -96,6 +97,16 @@ class BasicTreeTestSuite(unittest.TestCase):
             tree.get(-1)  # To small value
         with self.assertRaises(LookupError):
             tree.get(self.N + 1)  # To large value
+
+    def test_get_node_limits(self):
+        """Test that the node range limit is correct"""
+        tree = self.tree
+        tree.add(0, 'a')
+        tree.add(7, 'b')
+        tree.add(8, 'c')
+        tree.add(15, 'd')
+        self.assertEqual(tree.get(7), 'b')
+        self.assertEqual(tree.get(8), 'c')
 
     def test_remove(self):
         tree = self.tree
