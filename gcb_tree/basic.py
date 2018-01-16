@@ -175,7 +175,7 @@ class Node():
         return new_leaf
 
     def _test_value(self, value):
-        return self.range_small <= value and value <= self.range_big
+        return self.range_small <= value and value < self.range_big
 
     def drop_small(self):
         """Drop small child and self."""
@@ -270,11 +270,13 @@ class Root(Node):
         self.range_big = max_value
 
         # For printe_map
-        self.max_value = max_value
+        self.max_value = max_value - 1
         self.max_hight = 1 + max_value.bit_length()
 
     def get(self, value):
-        return self.child.get(value)
+        if self._test_value(value):
+            return self.child.get(value)
+        raise LookupError(f'Value not in Tree-range. ({self.range_small} to {self.range_big})')
 
     def _next_up(self, from_node):
         return None
@@ -285,7 +287,7 @@ class Root(Node):
     def add(self, value):
         if self._test_value(value):
             return self.child.add(value)
-        raise ValueError('Value not in Tree-range. ({self.range_small} to {self.range_big})')
+        raise ValueError(f'Value not in Tree-range. ({self.range_small} to {self.range_big})')
 
     def drop_small(self):
         self.drop_child()
