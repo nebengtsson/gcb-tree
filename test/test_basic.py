@@ -55,9 +55,8 @@ class BasicTreeTestSuite(unittest.TestCase):
         data = 'Data'
         tree.add(5, data)
 
-        tree.add(10, data)
-        self.assertEqual(tree.root.child.big_child.value, 10)
         # Add same twice
+        tree.add(10, data)
         tree.add(10, data)
         self.assertEqual(tree.root.child.big_child.value, 10)
 
@@ -65,18 +64,28 @@ class BasicTreeTestSuite(unittest.TestCase):
             tree.add(self.N + 1, data)
             tree.add(-1, data)
 
-    def test_add_meny(self):
+    def test_add_child_type(self):
         tree = self.tree
         data = 'Data'
+
         tree.add(5, data)
+        tree.add(10, data)
+        self.assertEqual(tree.root.child.big_child.child_type, 'big')
+        self.assertEqual(tree.root.child.small_child.child_type, 'small')
+
+        # Test child-type change correctly
+        tree.add(12, data)
+        leaf = tree.root.child.big_child.small_child
+        self.assertEqual(leaf.value, 10)
+        self.assertEqual(leaf.child_type, 'small')
+
         tree.add(4, data)
-        tree.add(1, data)
-        tree.add(16, data)
-        tree.add(7, data)
+        leaf = tree.root.child.small_child.big_child
+        self.assertEqual(leaf.value, 5)
+        self.assertEqual(leaf.child_type, 'big')
 
     def test_get(self):
         tree = self.tree
-        data = 'Test_data'
         tree.add(5, 'a')
         tree.add(4, 'b')
         tree.add(1, 'c')
