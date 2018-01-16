@@ -39,8 +39,18 @@ class BasicTree():
 
     def get(self, value):
         leaf = self._get_leaf(value)
-        if leaf:
+        if leaf and leaf.value == value:
             return leaf.data
+        raise LookupError(f'Value not found: {value}.')
+
+    def get_le(self, value):
+        leaf = self._get_leaf(value)
+        if leaf:
+            if leaf.value <= value:
+                return leaf.data
+            prev_leaf = leaf.prev()
+            if prev_leaf:
+                return prev_leaf.data
         raise LookupError(f'Value not found: {value}.')
 
     def _drop_leaf(self, leaf):
@@ -50,7 +60,7 @@ class BasicTree():
 
     def pop(self, value):
         leaf = self._get_leaf(value)
-        if leaf:
+        if leaf and leaf.value == value:
             self._drop_leaf(leaf)
             return leaf.data
         raise LookupError(f'Value not found: {value}.')
@@ -119,6 +129,22 @@ class Node():
         if value < self.value:
             return self.small_child.get(value)
         return self.big_child.get(value)
+
+    def _next_up(self, from_node):
+        if from_node.child_type == 'big':
+            return self.parent._next_up(self)
+        return self.big_child._next_down()
+
+    def _next_down(self):
+        return self.small_child._next_down()
+
+    def _prev_up(self, from_node):
+        if from_node.child_type == 'small':
+            return self.parent._prev_up(self)
+        return self.small_child._prev_down()
+
+    def _prev_down(self):
+        return self.big_child._prev_down()
 
     def insert_new_node_above(self, value):
         new_leaf = Leaf(value)
@@ -203,9 +229,19 @@ class Leaf(Node):
         return self.insert_new_node_above(value)
 
     def get(self, value):
-        if value == self.value:
-            return self
-        return None
+        return self
+
+    def next(self):
+        return self.parent._next_up(self)
+
+    def prev(self):
+        return self.parent._prev_up(self)
+
+    def _next_down(self):
+        return self
+
+    def _prev_down(self):
+        return self
 
     def drop(self):
         if self.child_type == 'small':

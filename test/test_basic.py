@@ -120,6 +120,30 @@ class BasicTreeTestSuite(unittest.TestCase):
         self.assertEqual(tree.pop(3), 'a')
         self.assertIsInstance(self.tree.root.child, EmptyNode)
 
+    def test_get_le(self):
+        tree = self.tree
+        tree.add(1, 'a')
+        tree.add(2, 'a2')
+        tree.add(3, 'b')
+        tree.add(7, 'c')
+        tree.add(9, 'd')
+        tree.add(10, 'e')
+        tree.add(12, 'f')
+        tree.add(13, 'g')
+        #tree.print_map()
+        self.assertEqual(tree.get_le(13), 'g')  # Hit big_child
+        self.assertEqual(tree.get_le(12), 'f')  # Hit small_child
+        self.assertEqual(tree.get_le(11), 'e')  #
+        self.assertEqual(tree.get_le(8), 'c')  # Hit (9) -> prev()
+        self.assertEqual(tree.get_le(6), 'b')
+        self.assertEqual(tree.get_le(15), 'g')
+        with self.assertRaises(LookupError):
+            tree.get_le(0)  # Smaller then the smallest in tree
+        with self.assertRaises(LookupError):
+            tree.get_le(-1)  # To small value
+        with self.assertRaises(LookupError):
+            tree.get_le(self.N + 1)  # To large value
+
 
 if __name__ == '__main__':
     unittest.main()
