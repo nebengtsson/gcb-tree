@@ -276,6 +276,12 @@ class Root(Node):
     def get(self, value):
         return self.child.get(value)
 
+    def _next_up(self, from_node):
+        return None
+
+    def _prev_up(self, from_node):
+        return None
+
     def add(self, value):
         if self._test_value(value):
             return self.child.add(value)
